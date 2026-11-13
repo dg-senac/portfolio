@@ -53,6 +53,8 @@ Endereço esperado: **https://dg-senac.github.io/portfolio/**
 
 O workflow define `DEPLOY_TARGET=github-pages`, e `vite.config.ts` usa `base: '/portfolio/'` nesse caso. Localmente, o projeto continua na raiz (`/`).
 
+Se aparecer `Get Pages site failed` ou `HttpError: Not Found`, o GitHub Pages ainda não está ativado ou a fonte selecionada não é **GitHub Actions**. Ter o arquivo `.yml` no repositório não ativa o Pages sozinho; é preciso selecionar **Settings → Pages → Build and deployment → Source → GitHub Actions**. O workflow verifica isso antes do deploy e mostra essa instrução. O aviso sobre migração do `ubuntu-latest` é informativo, não a causa dessa falha.
+
 ### Outras hospedagens
 
 Publique a pasta `dist/` em qualquer hospedagem estática (Vercel, Netlify, Cloudflare Pages etc.). Configure o build como `npm run build` e o diretório de saída como `dist`, sem definir `DEPLOY_TARGET=github-pages`.

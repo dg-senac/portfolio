@@ -20,7 +20,7 @@ concurrency:
 jobs:
   build:
     name: Validar e gerar o site
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Baixar o código
@@ -40,6 +40,36 @@ jobs:
         env:
           DEPLOY_TARGET: github-pages
 
+      - name: Verificar ativação do GitHub Pages
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          status=$(curl -sS -o /tmp/pages.json -w '%{http_code}' \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$REPOSITORY/pages")
+
+          if [ "$status" = "404" ]; then
+            echo "::error::GitHub Pages não está ativado. Abra Settings > Pages > Build and deployment > Source, selecione GitHub Actions e execute este workflow novamente."
+            exit 1
+          fi
+
+          if [ "$status" != "200" ]; then
+            echo "::error::Não foi possível consultar o GitHub Pages (HTTP $status)."
+            cat /tmp/pages.json
+            exit 1
+          fi
+
+          build_type=$(node -p "JSON.parse(require('fs').readFileSync('/tmp/pages.json', 'utf8')).build_type || ''")
+          if [ "$build_type" != "workflow" ]; then
+            echo "::error::GitHub Pages está ativado, mas a fonte atual é '$build_type'. Em Settings > Pages > Build and deployment > Source, selecione GitHub Actions."
+            exit 1
+          fi
+
       - name: Configurar GitHub Pages
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v6
@@ -54,7 +84,7 @@ jobs:
     name: Publicar site
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment:
       name: github-pages
