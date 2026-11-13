@@ -43,7 +43,19 @@ As fontes são hospedadas localmente via Fontsource. Os ícones vêm de Lucide. 
 
 ## Publicação
 
-Publique a pasta `dist/` em qualquer hospedagem estática (Vercel, Netlify, Cloudflare Pages etc.). Configure o build como `npm run build` e o diretório de saída como `dist`. O projeto usa caminhos na raiz (`/`); para GitHub Pages em um subcaminho, ajuste `base` em `vite.config.ts`.
+### GitHub Pages
+
+O workflow [`.github/workflows/main.yml`](.github/workflows/main.yml) valida o build em pull requests para `main` e publica automaticamente após merges/pushes na `main`. Também pode ser executado manualmente pela aba **Actions**.
+
+Antes do primeiro deploy, ative em **Settings → Pages → Build and deployment → Source** a opção **GitHub Actions**. Não é necessário criar secrets para este site.
+
+Endereço esperado: **https://dg-senac.github.io/portfolio/**
+
+O workflow define `DEPLOY_TARGET=github-pages`, e `vite.config.ts` usa `base: '/portfolio/'` nesse caso. Localmente, o projeto continua na raiz (`/`).
+
+### Outras hospedagens
+
+Publique a pasta `dist/` em qualquer hospedagem estática (Vercel, Netlify, Cloudflare Pages etc.). Configure o build como `npm run build` e o diretório de saída como `dist`, sem definir `DEPLOY_TARGET=github-pages`.
 
 ## Links e transparência
 
